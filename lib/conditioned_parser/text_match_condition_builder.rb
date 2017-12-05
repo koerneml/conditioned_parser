@@ -1,14 +1,12 @@
 module ConditionedParser
   # builds a text match condition from specified attributes
   class TextMatchConditionBuilder
-    def initialize(text_item)
-      @text_item = text_item
+    def initialize(content_element)
+      @text_item = content_element
     end
 
     def matching_a_pattern(pattern)
-      text_condition = TextMatchCondition.new
-      text_condition.pattern = pattern
-      text_condition.item = @text_item
+      text_condition = TextMatchCondition.new(@text_item, pattern)
       text_condition
     end
 

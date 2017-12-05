@@ -3,6 +3,11 @@ module ConditionedParser
   class Condition
     attr_accessor :item, :pattern
 
+    def initialize(content_element, pattern)
+      @item = content_element
+      @pattern = pattern
+    end
+
     def and(other_condition)
       matches? && other_condition.matches?
     end
