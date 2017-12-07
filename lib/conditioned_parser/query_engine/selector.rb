@@ -22,7 +22,11 @@ module ConditionedParser
 
       def filter_pages
         if @selectors[:page]
-          @document.pages.select { |page| page.page_no == @selectors[:page] }
+          if @selectors[:page].is_a? Range
+            @document.pages.select { |page| @selectors[:page].include?(page.page_no) }
+          else
+            @document.pages.select { |page| page.page_no == @selectors[:page] }
+          end
         else
           @document.pages
         end

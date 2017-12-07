@@ -13,9 +13,9 @@ module ConditionedParser
       end
 
       def self.generate_condition(document, condition_data, condition_type)
-        selector = Selector.new(document, condition_data[:condition][:location])
-        if condition_data[:condition][:text_options]
-          new_condition = TextMatchCondition.new(condition_data[:condition][:text_options][:pattern], selector, condition_type)
+        selector = Selector.new(document, condition_data[:location])
+        if condition_data[:text_options]
+          new_condition = TextMatchCondition.new(condition_data[:text_options][:pattern], selector, condition_type)
         end
         new_condition
       end

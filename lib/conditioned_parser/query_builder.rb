@@ -4,7 +4,7 @@ module ConditionedParser
     def initialize(document)
       @document = document
       @query_data = { query: { must: [], must_not: [] } }
-      @condition_template = { condition: { location: {}, text_options: {} } }
+      @condition_template = { location: {}, text_options: {} }
     end
 
     def i_want_that
@@ -16,23 +16,23 @@ module ConditionedParser
     end
 
     def on_page(num)
-      @condition_template[:condition][:location][:page] = num
+      @condition_template[:location][:page] = num
     end
 
     def in_region(region)
-      @condition_template[:condition][:location][:region] = region
+      @condition_template[:location][:region] = region
     end
 
     def there_is_text
       # TODO: Does this even work that way?!
       yield if block_given?
       @query_data[:query][:must] << @condition_template
-      @condition_template = { condition: { location: {}, text_options: {} } }
+      @condition_template = { location: {}, text_options: {} }
       @query_data
     end
 
     def matching_a_pattern(pattern)
-      @condition_template[:condition][:text_options][:pattern] = pattern
+      @condition_template[:text_options][:pattern] = pattern
     end
 
     def over_multiple_lines(line_def)

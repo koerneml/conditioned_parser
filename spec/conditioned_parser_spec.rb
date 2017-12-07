@@ -86,10 +86,32 @@ RSpec.describe ConditionedParser do
         expect(query.result?).to be true
       end
 
+      it 'finds the pattern given a page range' do
+        document = ConditionedParser.load_document(raw_data)
+        query = ConditionedParser.with_document document do
+          on_page 1..2
+          there_is_text do
+            matching_a_pattern(/pupiduh/)
+          end
+        end
+        expect(query.result?).to be true
+      end
+
       it 'does not find the pattern if another page is specified' do
         document = ConditionedParser.load_document(raw_data)
         query = ConditionedParser.with_document document do
           on_page 1
+          there_is_text do
+            matching_a_pattern(/pupiduh/)
+          end
+        end
+        expect(query.result?).to be false
+      end
+
+      it 'also does not find pattern if not in range' do
+        document = ConditionedParser.load_document(raw_data)
+        query = ConditionedParser.with_document document do
+          on_page 1..1
           there_is_text do
             matching_a_pattern(/pupiduh/)
           end
