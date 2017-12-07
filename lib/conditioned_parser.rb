@@ -2,24 +2,29 @@ require 'conditioned_parser/version'
 
 # Parses a document according to specified conditions
 module ConditionedParser
-  autoload :Condition, 'conditioned_parser/condition'
-  autoload :ConditionBuilder, 'conditioned_parser/condition_builder'
-  autoload :TextMatchCondition, 'conditioned_parser/text_match_condition'
-  autoload :TextMatchConditionBuilder,
-           'conditioned_parser/text_match_condition_builder'
-  autoload :Document, 'conditioned_parser/model/document'
-  autoload :ModelBuilder, 'conditioned_parser/model/model_builder'
+  autoload :QueryBuilder, 'conditioned_parser/query_builder'
 
+  # document representation
   module Model
-    autoload :ModelBuilder, 'conditioned_parser/model/model_builder'
+    autoload :Box, 'conditioned_parser/model/box'
     autoload :ContentElement, 'conditioned_parser/model/content_element'
     autoload :Document, 'conditioned_parser/model/document'
     autoload :Line, 'conditioned_parser/model/line'
+    autoload :ModelBuilder, 'conditioned_parser/model/model_builder'
     autoload :Page, 'conditioned_parser/model/page'
     autoload :PageRegion, 'conditioned_parser/model/page_region'
-    autoload :PageTemplate, 'conditioned_parser/model/page_template'
+    autoload :PageTemplateBuilder, 'conditioned_parser/model/page_template_builder'
     autoload :TextBlock, 'conditioned_parser/model/text_block'
     autoload :Word, 'conditioned_parser/model/word'
+  end
+
+  # query interpretation and evaluation
+  module QueryEngine
+    autoload :Condition, 'conditioned_parser/query_engine/condition'
+    autoload :Query, 'conditioned_parser/query_engine/query'
+    autoload :QueryParser, 'conditioned_parser/query_engine/query_parser'
+    autoload :Selector, 'conditioned_parser/query_engine/selector'
+    autoload :TextMatchCondition, 'conditioned_parser/query_engine/text_match_condition'
   end
 
   def self.load_document(raw_data)
@@ -27,7 +32,8 @@ module ConditionedParser
   end
 
   def self.with_document(document, &block)
-    condition_builder = ConditionBuilder.new(document)
-    condition_builder.instance_eval(&block) if block_given?
+    query_builder = QueryBuilder.new(document)
+    query_data = query_builder.instance_eval(&block) if block_given?
+    QueryEngine::QueryParser.generate_query(query_data, document)
   end
 end

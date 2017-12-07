@@ -1,10 +1,11 @@
 module ConditionedParser
   module Model
+    # Represents a single word in the document
     class Word < ContentElement
       attr_accessor :text
 
-      def initialize(x_start, x_end, y_start, y_end, text)
-        super(x_start, x_end, y_start, y_end)
+      def initialize(box, text)
+        super(box)
         @text = text
       end
 

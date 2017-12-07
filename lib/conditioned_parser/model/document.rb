@@ -1,10 +1,11 @@
 module ConditionedParser
   module Model
+    # Representation of a document to be queried
     class Document
       attr_accessor :pages
 
       def initialize
-        @pages = Array.new
+        @pages = []
       end
     end
   end

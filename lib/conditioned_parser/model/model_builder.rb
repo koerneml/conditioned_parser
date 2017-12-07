@@ -1,5 +1,6 @@
 module ConditionedParser
   module Model
+    # Builds the document object model based on raw data specification
     class ModelBuilder
       def self.build_model_data(raw_data)
         document = Document.new
