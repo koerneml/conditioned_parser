@@ -3,7 +3,7 @@ module ConditionedParser
     # generates page_regions according to region specification
     class PageTemplateBuilder
       def self.build_no_template(width, height)
-        region_data = [{ identifier: :complete_page, x_start: 0, x_end: width, y_start: 0, y_end: height }]
+        region_data = [{ identifier: :complete_page, x_start: 0, x_end: width.to_f, y_start: 0, y_end: height.to_f }]
         create_template(region_data)
       end
 

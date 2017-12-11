@@ -36,9 +36,9 @@ module ConditionedParser
         applicable_regions = pages.inject([]) do |memo, page|
           memo << page.page_regions
         end
-        if @selectors[:page_region]
+        if @selectors[:region]
           applicable_regions = applicable_regions.map do |regions_per_page|
-            regions_per_page.select(@selectors[:page_region])
+            regions_per_page.select { |region| @selectors[:region].include?(region) }
           end
         end
         applicable_regions

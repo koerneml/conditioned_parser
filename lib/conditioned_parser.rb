@@ -27,8 +27,9 @@ module ConditionedParser
     autoload :TextMatchCondition, 'conditioned_parser/query_engine/text_match_condition'
   end
 
-  def self.load_document(raw_data)
-    Model::ModelBuilder.build_model_data(raw_data)
+  def self.load_document(dev_mode, raw_data, &block)
+    # TODO: Remove dev mode flag
+    Model::ModelBuilder.build_model_data(raw_data, dev_mode, &block)
   end
 
   def self.with_document(document, &block)

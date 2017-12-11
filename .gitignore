@@ -4,6 +4,8 @@
 /coverage/
 /doc/
 /pkg/
+/spec/cond_parser_with_real_data_spec.rb
+/spec/files/
 /spec/reports/
 /tmp/
 

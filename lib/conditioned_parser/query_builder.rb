@@ -7,20 +7,12 @@ module ConditionedParser
       @condition_template = { location: {}, text_options: {} }
     end
 
-    def i_want_that
-      @type = :must
-    end
-
-    def i_dont_want_that
-      @type = :must_not
-    end
-
     def on_page(num)
       @condition_template[:location][:page] = num
     end
 
     def in_region(region)
-      @condition_template[:location][:region] = region
+      @condition_template[:location][:region] = [region]
     end
 
     def there_is_text

@@ -1,3 +1,5 @@
+require 'nori'
+
 RSpec.describe ConditionedParser do
   it 'has a version number' do
     expect(ConditionedParser::VERSION).not_to be nil
@@ -55,7 +57,7 @@ RSpec.describe ConditionedParser do
     let(:raw_data) { { document: { pages: [sample_page1, sample_page2] } } }
 
     it 'performs a simple text match' do
-      document = ConditionedParser.load_document(raw_data)
+      document = ConditionedParser.load_document(false, raw_data)
       query = ConditionedParser.with_document document do
         there_is_text do
           matching_a_pattern(/Yolo/)
@@ -65,7 +67,7 @@ RSpec.describe ConditionedParser do
     end
 
     it 'does not match when there is no match' do
-      document = ConditionedParser.load_document(raw_data)
+      document = ConditionedParser.load_document(false, raw_data)
       query = ConditionedParser.with_document document do
         there_is_text do
           matching_a_pattern(/Swag/)
@@ -76,7 +78,7 @@ RSpec.describe ConditionedParser do
 
     context 'and looking for a specific page' do
       it 'finds the pattern on the specified page' do
-        document = ConditionedParser.load_document(raw_data)
+        document = ConditionedParser.load_document(false, raw_data)
         query = ConditionedParser.with_document document do
           on_page 2
           there_is_text do
@@ -87,7 +89,7 @@ RSpec.describe ConditionedParser do
       end
 
       it 'finds the pattern given a page range' do
-        document = ConditionedParser.load_document(raw_data)
+        document = ConditionedParser.load_document(false, raw_data)
         query = ConditionedParser.with_document document do
           on_page 1..2
           there_is_text do
@@ -98,7 +100,7 @@ RSpec.describe ConditionedParser do
       end
 
       it 'does not find the pattern if another page is specified' do
-        document = ConditionedParser.load_document(raw_data)
+        document = ConditionedParser.load_document(false, raw_data)
         query = ConditionedParser.with_document document do
           on_page 1
           there_is_text do
@@ -109,7 +111,7 @@ RSpec.describe ConditionedParser do
       end
 
       it 'also does not find pattern if not in range' do
-        document = ConditionedParser.load_document(raw_data)
+        document = ConditionedParser.load_document(false, raw_data)
         query = ConditionedParser.with_document document do
           on_page 1..1
           there_is_text do
@@ -118,6 +120,79 @@ RSpec.describe ConditionedParser do
         end
         expect(query.result?).to be false
       end
+    end
+  end
+
+  context 'when parsing ACTUAL documents' do
+    let(:raw_data) { Nori.new(advanced_typecasting: false).parse(File.read(File.expand_path('files/real_life_test.xml', File.dirname(__FILE__)))) }
+
+    it 'finds a simple string in the document' do
+      document = ConditionedParser.load_document(true, raw_data)
+      query = ConditionedParser.with_document document do
+        there_is_text do
+          matching_a_pattern(/Rechnung/)
+        end
+      end
+      expect(query.result?).to be true
+    end
+
+    it 'does not find non-matching strings' do
+      document = ConditionedParser.load_document(true, raw_data)
+      query = ConditionedParser.with_document document do
+        there_is_text do
+          matching_a_pattern(/YOLO!!/)
+        end
+      end
+      expect(query.result?).to be false
+    end
+
+    address_region = {
+      identifier: :address,
+      x_start: 70.0,
+      x_end: 200.0,
+      y_start: 160.0,
+      y_end: 235.0
+    }
+    somewhere_else = {
+      identifier: :somewhere,
+      x_start: 0.0,
+      x_end: 20.0,
+      y_start: 0.0,
+      y_end: 50.0
+    }
+
+    it 'looks up specific stuff in previously defined regions' do
+      document = ConditionedParser.load_document(true, raw_data) do
+        use_template [address_region, somewhere_else] do
+          for_page 1
+        end
+      end
+
+      query = ConditionedParser.with_document document do
+        on_page 1
+        in_region :address
+        there_is_text do
+          matching_a_pattern(/28790/)
+        end
+      end
+      expect(query.result?).to be true
+    end
+
+    it 'does not find the string in a region where it is not' do
+      document = ConditionedParser.load_document(true, raw_data) do
+        use_template [address_region, somewhere_else] do
+          for_page 1
+        end
+      end
+
+      query = ConditionedParser.with_document document do
+        on_page 1
+        in_region :somewhere
+        there_is_text do
+          matching_a_pattern(/28790/)
+        end
+      end
+      expect(query.result?).to be false
     end
   end
 end
