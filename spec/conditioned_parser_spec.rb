@@ -13,7 +13,7 @@ RSpec.describe ConditionedParser do
       query.constraints do
         page 1 do
           search_item :type do
-            pattern /Rechnung/
+            pattern(/Rechnung/)
           end
         end
       end
@@ -24,7 +24,7 @@ RSpec.describe ConditionedParser do
       query = ConditionedParser::Query.new(raw_data)
       query.constraints do
         search_item :type do
-          pattern /YOLO!!/
+          pattern(/YOLO!!/)
         end
       end
       expect(query.result?).to be false
@@ -51,8 +51,9 @@ RSpec.describe ConditionedParser do
         page 1 do
           with_template [address_region, somewhere_else] do
             region :address do
+              # lines = text_lines { height_tolerance: 5.0 }
               search_item :postal
-              pattern /28790/
+              pattern(/28790/)
             end
           end
         end
@@ -68,7 +69,7 @@ RSpec.describe ConditionedParser do
           with_template [address_region, somewhere_else] do
             region :somewhere do
               search_item :postal
-              pattern /28790/
+              pattern(/28790/)
             end
           end
         end

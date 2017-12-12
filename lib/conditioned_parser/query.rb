@@ -8,7 +8,15 @@ module ConditionedParser
 
     def constraints(&block)
       @current_doc = @document.dup # shallow here! watch out when modifying!
-      instance_eval &block if block_given?
+      instance_eval(&block) if block_given?
+    end
+
+    def font_size(value, &block)
+      # TODO: Implement
+    end
+
+    def text_lines(options = {}, &block)
+      # TODO: Implement
     end
 
     def result
@@ -29,25 +37,33 @@ module ConditionedParser
       end
     end
 
-    def page(value, &block)
-      filter(:page, value, &block)
+    def page(num, &block)
+      @current_doc.pages.select! { |page| page.page_no == num }
+      instance_eval(&block) if block_given?
     end
 
     def pages(range, &block)
-      filter(:pages, range, &block)
+      @current_doc.pages.select! { |page| range.include?(page.page_no) }
+      instance_eval(&block) if block_given?
     end
 
     def pattern(value, &block)
-      filter(:pattern, value, &block)
+      @current_doc.pages.each do |page|
+        page.content_elements.select! { |element| element.contained_text.match(value) }
+      end
+      instance_eval(&block) if block_given?
     end
 
-    def region(value, &block)
-      filter(:region, value, &block)
+    def region(identifier, &block)
+      @current_doc.pages.each do |page|
+        page.content_elements.select! { |word| word.box.contained_in?(@template[identifier]) }
+      end
+      instance_eval(&block) if block_given?
     end
 
     def search_item(value, &block)
       @search_item = value
-      instance_eval &block if block_given?
+      instance_eval(&block) if block_given?
     end
 
     def with_template(template_data, &block)
@@ -56,39 +72,9 @@ module ConditionedParser
 
     private
 
-    def filter(type, value, &block)
-      case type
-      when :page
-        @current_doc.pages.select! { |page| page.page_no == value }
-      when :pages
-        @current_doc.pages.select! { |page| value.include?(page.page_no) }
-      when :region
-        @current_doc.pages.each do |page|
-          page.content_elements.select! { |word| word.box.contained_in?(@template[value]) }
-        end
-      when :pattern
-        @current_doc.pages.each do |page|
-          page.content_elements.select! { |element| element.contained_text.match(value) }
-        end
-      when :font_size
-      end
-      instance_eval &block if block_given?
-    end
-
-    def group(type, options = {}, &block)
-      case type
-      when :letters_to_word
-        # :kerning_tolerance?
-      when :words_to_line
-        # :line_height_difference_tolerance
-      when :Line_to_block
-      end
-      instance_eval &block if block_given?
-    end
-
     def view(template_data, &block)
       @template = Model::PageTemplateBuilder.build_template(template_data)
-      instance_eval &block if block_given?
+      instance_eval(&block) if block_given?
     end
   end
 end

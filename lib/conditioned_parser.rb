@@ -14,5 +14,4 @@ module ConditionedParser
     autoload :PageTemplateBuilder, 'conditioned_parser/model/page_template_builder'
     autoload :Word, 'conditioned_parser/model/word'
   end
-
 end
