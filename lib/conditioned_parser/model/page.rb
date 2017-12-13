@@ -11,16 +11,6 @@ module ConditionedParser
         @page_no = page_no
         @content_elements = []
       end
-
-      def fill_in_data(page_data)
-        page_data.each do |word|
-          @content_elements << Word.new(Box.new(word.attributes['xMin'].to_f, word.attributes['xMax'].to_f, word.attributes['yMin'].to_f, word.attributes['yMax'].to_f), word.to_s)
-        end
-        # TODO: Non-Nori version here:
-        # page_data.each do |word|
-        #   @content_elements << Word.new(Box.new(word[:x_start], word[:x_end], word[:y_start], word[:y_end]), word[:text])
-        # end
-      end
     end
   end
 end

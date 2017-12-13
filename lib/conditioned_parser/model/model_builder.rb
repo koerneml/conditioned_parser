@@ -2,24 +2,20 @@ module ConditionedParser
   module Model
     # Builds the document object model based on raw data specification
     class ModelBuilder
-      def self.build_model(raw_data)
-        document = Document.new
-        raw_data['html']['body']['doc']['page'].each_with_index.each_with_object([]) do |(page_data, idx), _memo|
-          new_page = Page.new(idx + 1, page_data['@width'], page_data['@height'])
-          new_page.fill_in_data(page_data['word'])
-          document.pages << new_page
-        end
-        # TODO: original non-Nori loader here:
-        # raw_data[:document][:pages].each do |page|
-        #   new_page = Page.new(page[:page_no], page[:width], page[:height])
-        #   new_page.fill_in_data(page[:words])
-        #   document.pages << new_page
-        # end
-        document
-      end
-
       def self.build_line(words)
         Line.new(surrounding_box_for(words), words)
+      end
+
+      def self.build_lines(words, options = {})
+        lines = []
+        words = words.dup
+        until words.empty?
+          new_line = [words.shift]
+          (new_line << words.select { |word| word.on_same_line?(new_line.first, options) }).flatten!
+          words.reject! { |word| word.on_same_line?(new_line.first) }
+          lines << build_line(new_line)
+        end
+        lines
       end
 
       def self.build_text_box(lines)
@@ -27,11 +23,12 @@ module ConditionedParser
       end
 
       def self.surrounding_box_for(content_elements)
-        x_min = content_elements.min_by { |element| element.box.x_start }
-        x_max = content_elements.max_by { |element| element.box.x_end }
-        y_min = content_elements.min_by { |element| element.box.y_start }
-        y_max = content_elements.max_by { |element| element.box.y_end }
-        Box.new(x_min, x_max, y_min, y_max)
+        {
+          x_start: content_elements.min_by(&:x_start).x_start,
+          x_end: content_elements.max_by(&:x_end).x_end,
+          y_start: content_elements.min_by(&:y_start).y_start,
+          y_end: content_elements.max_by(&:y_end).y_end
+        }
       end
     end
   end

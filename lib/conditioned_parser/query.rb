@@ -3,7 +3,25 @@ module ConditionedParser
   class Query
     def initialize(raw_data)
       @raw_data = raw_data
-      @document = Model::ModelBuilder.build_model(raw_data)
+      @document = Model::DocumentInputProcessor.build_model(raw_data)
+    end
+
+    def as_text_block(options = {}, &block)
+      # TODO: Implement
+    end
+
+    def as_text_lines(options = {}, &block)
+      lines = []
+      @current_doc.pages.each_with_index do |page, index|
+        page_lines = Model::ModelBuilder.build_lines(page.content_elements, options)
+        if block_given?
+          # if we want to work on with this, we alter the document structure to contain the aggregation
+          @current_doc.pages[index].content_elements = page_lines
+        else
+          (lines << page_lines).flatten!
+        end
+      end
+      block_given? ? instance_eval(&block) : lines
     end
 
     def constraints(&block)
@@ -13,28 +31,6 @@ module ConditionedParser
 
     def font_size(value, &block)
       # TODO: Implement
-    end
-
-    def text_lines(options = {}, &block)
-      # TODO: Implement
-    end
-
-    def result
-      result_hsh = {}
-      matches = []
-      @current_doc.pages.each do |page|
-        page.content_elements.each do |content|
-          matches << content.contained_text
-        end
-      end
-      result_hsh[@search_item] = matches
-      result_hsh
-    end
-
-    def result?
-      @current_doc.pages.any? do |page|
-        !page.content_elements.empty?
-      end
     end
 
     def page(num, &block)
@@ -47,18 +43,37 @@ module ConditionedParser
       instance_eval(&block) if block_given?
     end
 
-    def pattern(value, &block)
+    def pattern(expression, &block)
+      @match_pattern = expression
       @current_doc.pages.each do |page|
-        page.content_elements.select! { |element| element.contained_text.match(value) }
+        page.content_elements.select! { |element| element.match(expression) }
       end
       instance_eval(&block) if block_given?
     end
 
     def region(identifier, &block)
       @current_doc.pages.each do |page|
-        page.content_elements.select! { |word| word.box.contained_in?(@template[identifier]) }
+        page.content_elements.select! { |word| word.contained_in?(@template[identifier]) }
       end
       instance_eval(&block) if block_given?
+    end
+
+    def result
+      result_hsh = {}
+      matches = []
+      @current_doc.pages.each do |page|
+        page.content_elements.each do |content|
+          matches << content.match(@match_pattern)
+        end
+      end
+      result_hsh[@search_item] = matches
+      result_hsh
+    end
+
+    def result?
+      @current_doc.pages.any? do |page|
+        !page.content_elements.empty?
+      end
     end
 
     def search_item(value, &block)

@@ -17,6 +17,7 @@ RSpec.describe ConditionedParser do
           end
         end
       end
+      puts query.result
       expect(query.result?).to be true
     end
 
@@ -27,6 +28,7 @@ RSpec.describe ConditionedParser do
           pattern(/YOLO!!/)
         end
       end
+      puts query.result
       expect(query.result?).to be false
     end
 
@@ -51,9 +53,10 @@ RSpec.describe ConditionedParser do
         page 1 do
           with_template [address_region, somewhere_else] do
             region :address do
-              # lines = text_lines { height_tolerance: 5.0 }
-              search_item :postal
-              pattern(/28790/)
+              as_text_lines do
+                search_item :postal
+                pattern(/^\d{5}/)
+              end
             end
           end
         end
@@ -68,8 +71,10 @@ RSpec.describe ConditionedParser do
         page 1 do
           with_template [address_region, somewhere_else] do
             region :somewhere do
-              search_item :postal
-              pattern(/28790/)
+              as_text_lines do
+                search_item :postal
+                pattern(/^\d{5}/)
+              end
             end
           end
         end

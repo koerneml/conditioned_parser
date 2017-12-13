@@ -12,6 +12,10 @@ module ConditionedParser
       def contained_text
         @text
       end
+
+      def inspect
+        "#<#{self.class.name}: x_start: #{x_start}, x_end: #{x_end}, y_start: #{y_start}, y_end: #{y_end}, contained_text: #{contained_text}"
+      end
     end
   end
 end
