@@ -1,36 +1,40 @@
 module ConditionedParser
   # Applies a query from dsl query specification
   class Query
-    def initialize(raw_data)
-      @raw_data = raw_data
-      @document = Model::DocumentInputProcessor.build_model(raw_data)
+    def initialize(document, context)
+      @current_doc = document
+      @context = context
+    end
+
+    def action_dispatch(method, *args, &block)
+      __send__(method, *args)
+      instance_eval(&block) if block_given?
     end
 
     def as_text_block(options = {}, &block)
       # TODO: Implement
     end
 
-    def as_text_lines(options = {}, &block)
+    def as_text_lines(options = {})
       lines = []
       @current_doc.pages.each_with_index do |page, index|
         page_lines = Model::ModelBuilder.build_lines(page.content_elements, options)
-        if block_given?
+        # if block_given?
           # if we want to work on with this, we alter the document structure to contain the aggregation
-          @current_doc.pages[index].content_elements = page_lines
-        else
-          (lines << page_lines).flatten!
-        end
+         # @current_doc.pages[index].content_elements = page_lines
+        # else
+        (lines << page_lines).flatten!
+        # end
       end
-      block_given? ? instance_eval(&block) : lines
-    end
-
-    def constraints(&block)
-      @current_doc = @document.dup # shallow here! watch out when modifying!
-      instance_eval(&block) if block_given?
+      block_given? ? yield(lines.to_enum) : lines
     end
 
     def font_size(value, &block)
       # TODO: Implement
+    end
+
+    def on_each_page
+      yield(@current_doc.pages.to_enum)
     end
 
     def page(num, &block)

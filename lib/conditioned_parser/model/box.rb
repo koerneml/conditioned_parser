@@ -14,9 +14,9 @@ module ConditionedParser
 
       def on_same_line?(other, options = {})
         defaults = { y_tolerance: 0.5, height_tolerance: 2.0 }
-        options = defaults.merge(options)
+        defaults.merge!(options)
         # boxes are considered to be on the same line if their y_start and height are similar
-        (y_start - other.y_start).abs <= options[:y_tolerance] && (height - other.height).abs <= options[:height_tolerance]
+        (y_start - other.y_start).abs <= defaults[:y_tolerance] && (height - other.height).abs <= defaults[:height_tolerance]
       end
 
       def width

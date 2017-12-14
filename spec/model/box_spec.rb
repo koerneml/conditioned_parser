@@ -89,7 +89,6 @@ RSpec.describe ConditionedParser::Model::Box do
       end
 
       context 'with adapted tolerance values' do
-
         tolerance_opts = {
           y_tolerance: 0.7,
           height_tolerance: 4.0

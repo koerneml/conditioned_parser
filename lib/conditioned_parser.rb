@@ -18,4 +18,20 @@ module ConditionedParser
     autoload :TextBox, 'conditioned_parser/model/text_box'
     autoload :Word, 'conditioned_parser/model/word'
   end
+
+  def self.with_document(raw_data, &block)
+    @document = Model::DocumentInputProcessor.build_document(raw_data)
+    @context = eval 'self', block.binding
+    instance_eval(&block) if block_given?
+  end
+
+  def self.define_query(&block)
+    query = Query.new(@document, @context)
+    query.instance_eval(&block) if block_given?
+    query
+  end
+
+  def self.method_missing(method, *args, &block)
+    @context.__send__(method, *args, &block)
+  end
 end
