@@ -1,8 +1,12 @@
 module ConditionedParser
   # Applies a query from dsl query specification
   class Query
+    include Filter
+    include Matcher
+    attr_accessor :search_scope
+
     def initialize(document)
-      @current_doc = document
+      @search_scope = document.pages
     end
 
     def as_text_block(options = {})
@@ -10,12 +14,7 @@ module ConditionedParser
     end
 
     def as_text_lines(options = {})
-      lines = []
-      @current_doc.pages.each do |page|
-        page_lines = Model::ModelBuilder.build_lines(page.content_elements, options)
-        (lines << page_lines).flatten!
-      end
-      lines
+      @search_scope = Model::ModelBuilder.build_lines(@search_scope, options)
     end
 
     def font_size(value)
@@ -23,43 +22,39 @@ module ConditionedParser
     end
 
     def page(num)
-      @current_doc.filter_pages_by_page_no(num)
+      @search_scope = filter_search_scope_by_page_no(num)[0].sub_elements
     end
 
     def pages(range)
-      @current_doc.pages.select! { |page| range.include?(page.page_no) }
+      conflated_pages = []
+      @search_scope.select { |page| range.include?(page.page_no) }.each_with_object(conflated_pages) do |page, memo|
+        (memo << page.sub_elements).flatten!
+      end
+      @search_scope = conflated_pages
     end
 
     def pattern(expression)
       @match_pattern = expression
-      @current_doc.pages.each do |page|
-        page.match_content_elements_by(expression)
-      end
+      @search_scope = match_search_scope_by(expression)
     end
 
     def region(identifier)
-      @current_doc.pages.each do |page|
-        page.filter_page_regions_by_identifier(identifier)
-        page.content_elements.select! { |element| page.page_regions.any? { |reg| element.contained_in?(reg) } }
-      end
+      @page_regions.select! { |region| region.identifier == identifier }
+      @search_scope = @search_scope.select { |element| @page_regions.any? { |region| element.contained_in?(region) } }
     end
 
     def result
       result_hsh = {}
       matches = []
-      @current_doc.pages.each do |page|
-        page.content_elements.each do |content|
-          matches << content.match(@match_pattern)
-        end
+      @search_scope.each do |element|
+        matches << element.match(@match_pattern)
       end
       result_hsh[@search_item] = matches
       result_hsh
     end
 
     def result?
-      @current_doc.pages.any? do |page|
-        !page.content_elements.empty?
-      end
+      !@search_scope.empty?
     end
 
     def search_item(value)
@@ -67,9 +62,7 @@ module ConditionedParser
     end
 
     def with_template(template_data)
-      @current_doc.pages.each do |page|
-        page.page_regions = Model::PageTemplateBuilder.build_template(template_data)
-      end
+      @page_regions = Model::PageTemplateBuilder.build_template(template_data)
     end
   end
 end

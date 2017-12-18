@@ -4,7 +4,7 @@ module ConditionedParser
   module Filter
     def filter_for(coll, attr)
       filter = proc do |value|
-        send(coll).select! { |element| element.send(attr) == value }
+        send(coll).select { |element| element.send(attr) == value }
       end
       self.class.send(:define_method, "filter_#{coll}_by_#{attr}".to_sym, filter)
     end

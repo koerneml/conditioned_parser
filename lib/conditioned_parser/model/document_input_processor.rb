@@ -9,10 +9,19 @@ module ConditionedParser
       end
 
       def self.build_page(no, page_data)
-        new_page = Page.new(no, page_data['@width'], page_data['@height'])
+        new_page = Page.new(define_page_box(page_data['@width'], page_data['@height']), no)
         page_data['word'].each_with_object(new_page) do |word_data, page|
-          page.content_elements << build_word(word_data)
+          page.sub_elements << build_word(word_data)
         end
+      end
+
+      def self.define_page_box(width, height)
+        box = {
+          x_start: 0.0,
+          x_end: width,
+          y_start: 0.0,
+          y_end: height
+        }
       end
 
       def self.build_word(word_data)

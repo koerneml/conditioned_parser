@@ -2,7 +2,7 @@ module ConditionedParser
   module Matcher
     def matcher_for(coll, pattern)
       matcher = proc do |pattern|
-        send(coll).select! { |element| element.send(:matches?, pattern) }
+        send(coll).select { |element| element.send(:matches?, pattern) }
       end
       self.class.send(:define_method, "match_#{coll}_by", matcher)
     end

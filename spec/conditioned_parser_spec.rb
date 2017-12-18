@@ -91,8 +91,53 @@ RSpec.describe ConditionedParser do
           text_lines = as_text_lines
         end
       end
-      puts 'hello'
-      puts text_lines.inspect
+      expect(text_lines.last.matches?(/^\d{5}/)).to be true
+    end
+
+    context 'when chaining conditions' do
+
+      it 'allows chaining conditions with and - true - true' do
+        good_query = nil
+        other_good_query = nil
+        ConditionedParser.with_document raw_data do
+          good_query = define_query do
+            page 1
+            with_template [address_region, somewhere_else]
+            region :address
+            as_text_lines
+            search_item :postal
+            pattern(/^\d{5}/)
+          end
+          other_good_query = define_query do
+            page 1
+            search_item :type
+            pattern(/Rechnung/)
+          end
+        end
+        expect(good_query.result? && other_good_query.result?).to be true
+      end
+
+      it 'allows chaining conditions with and - true - false' do
+        good_query = nil
+        bad_query = nil
+        ConditionedParser.with_document raw_data do
+          good_query = define_query do
+            page 1
+            with_template [address_region, somewhere_else]
+            region :address
+            search_item :postal
+            pattern(/^\d{5}/)
+          end
+          bad_query = define_query do
+            pages 1..2
+            as_text_lines
+            search_item :bs
+            pattern(/YOLO/)
+          end
+        end
+        expect(good_query.result? && bad_query.result?).to be false
+        expect(good_query.result? || bad_query.result?).to be true
+      end
     end
   end
 end
