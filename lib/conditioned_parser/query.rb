@@ -1,65 +1,47 @@
 module ConditionedParser
   # Applies a query from dsl query specification
   class Query
-    def initialize(document, context)
+    def initialize(document)
       @current_doc = document
-      @context = context
     end
 
-    def action_dispatch(method, *args, &block)
-      __send__(method, *args)
-      instance_eval(&block) if block_given?
-    end
-
-    def as_text_block(options = {}, &block)
+    def as_text_block(options = {})
       # TODO: Implement
     end
 
     def as_text_lines(options = {})
       lines = []
-      @current_doc.pages.each_with_index do |page, index|
+      @current_doc.pages.each do |page|
         page_lines = Model::ModelBuilder.build_lines(page.content_elements, options)
-        # if block_given?
-          # if we want to work on with this, we alter the document structure to contain the aggregation
-         # @current_doc.pages[index].content_elements = page_lines
-        # else
         (lines << page_lines).flatten!
-        # end
       end
-      block_given? ? yield(lines.to_enum) : lines
+      lines
     end
 
-    def font_size(value, &block)
+    def font_size(value)
       # TODO: Implement
     end
 
-    def on_each_page
-      yield(@current_doc.pages.to_enum)
+    def page(num)
+      @current_doc.filter_pages_by_page_no(num)
     end
 
-    def page(num, &block)
-      @current_doc.pages.select! { |page| page.page_no == num }
-      instance_eval(&block) if block_given?
-    end
-
-    def pages(range, &block)
+    def pages(range)
       @current_doc.pages.select! { |page| range.include?(page.page_no) }
-      instance_eval(&block) if block_given?
     end
 
-    def pattern(expression, &block)
+    def pattern(expression)
       @match_pattern = expression
       @current_doc.pages.each do |page|
-        page.content_elements.select! { |element| element.match(expression) }
+        page.match_content_elements_by(expression)
       end
-      instance_eval(&block) if block_given?
     end
 
-    def region(identifier, &block)
+    def region(identifier)
       @current_doc.pages.each do |page|
-        page.content_elements.select! { |word| word.contained_in?(@template[identifier]) }
+        page.filter_page_regions_by_identifier(identifier)
+        page.content_elements.select! { |element| page.page_regions.any? { |reg| element.contained_in?(reg) } }
       end
-      instance_eval(&block) if block_given?
     end
 
     def result
@@ -80,20 +62,14 @@ module ConditionedParser
       end
     end
 
-    def search_item(value, &block)
+    def search_item(value)
       @search_item = value
-      instance_eval(&block) if block_given?
     end
 
-    def with_template(template_data, &block)
-      view(template_data, &block)
-    end
-
-    private
-
-    def view(template_data, &block)
-      @template = Model::PageTemplateBuilder.build_template(template_data)
-      instance_eval(&block) if block_given?
+    def with_template(template_data)
+      @current_doc.pages.each do |page|
+        page.page_regions = Model::PageTemplateBuilder.build_template(template_data)
+      end
     end
   end
 end

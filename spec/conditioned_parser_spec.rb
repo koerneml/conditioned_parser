@@ -9,29 +9,29 @@ RSpec.describe ConditionedParser do
     let(:raw_data) { Nori.new(advanced_typecasting: false).parse(File.read(File.expand_path('files/real_life_test.xml', File.dirname(__FILE__)))) }
 
     it 'finds a simple string in the document' do
+      query = nil
       ConditionedParser.with_document raw_data do
         query = define_query do
-          page 1 do
-            search_item :type
-            pattern(/Rechnung/)
-          end
+          page 1
+          search_item :type
+          pattern(/Rechnung/)
         end
-        puts query.result
-        expect(query.result?).to be true
       end
+      puts query.result
+      expect(query.result?).to be true
     end
 
     it 'does not find non-matching strings' do
+      query = nil
       ConditionedParser.with_document raw_data do
         query = define_query do
-          page 1 do
-            search_item :type
-            pattern(/YOLO!!/)
-          end
+          page 1
+          search_item :type
+          pattern(/YOLO!!/)
         end
-        puts query.result
-        expect(query.result?).to be false
       end
+      puts query.result
+      expect(query.result?).to be false
     end
 
     address_region = {
@@ -50,41 +50,49 @@ RSpec.describe ConditionedParser do
     }
 
     it 'looks up specific stuff in previously defined regions' do
+      query = nil
       ConditionedParser.with_document raw_data do
         query = define_query do
-          page 1 do
-            with_template [address_region, somewhere_else] do
-              region :address do
-                as_text_lines do
-                  search_item :postal
-                  pattern(/^\d{5}/)
-                end
-              end
-            end
-          end
+          page 1
+          with_template [address_region, somewhere_else]
+          region :address
+          as_text_lines
+          search_item :postal
+          pattern(/^\d{5}/)
         end
-        puts query.result
-        expect(query.result?).to be true
       end
+      puts query.result
+      expect(query.result?).to be true
     end
 
     it 'does not find the string in a region where it is not' do
+      query = nil
       ConditionedParser.with_document raw_data do
         query = define_query do
-          page 1 do
-            with_template [address_region, somewhere_else] do
-              region :somewhere do
-                as_text_lines do |line|
-                  search_item :postal
-                  pattern(/^\d{5}/)
-                end
-              end
-            end
-          end
+          page 1
+          with_template [address_region, somewhere_else]
+          region :somewhere
+          search_item :postal
+          pattern(/^\d{5}/)
         end
-        puts query.result
-        expect(query.result?).to be false
       end
+      puts query.result
+      expect(query.result?).to be false
+    end
+
+    it 'allows for custom manipulation of text lines' do
+      query = nil
+      text_lines = nil
+      ConditionedParser.with_document raw_data do
+        query = define_query do
+          page 1
+          with_template [address_region, somewhere_else]
+          region :address
+          text_lines = as_text_lines
+        end
+      end
+      puts 'hello'
+      puts text_lines.inspect
     end
   end
 end

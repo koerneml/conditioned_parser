@@ -4,7 +4,10 @@ module ConditionedParser
     class PageRegion
       include Box
 
-      def initialize(box)
+      attr_accessor :identifier
+
+      def initialize(box, identifier)
+        @identifier = identifier
         @x_start = box[:x_start]
         @x_end = box[:x_end]
         @y_start = box[:y_start]

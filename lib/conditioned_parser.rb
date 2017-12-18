@@ -3,6 +3,8 @@ require 'conditioned_parser/version'
 # Parses a document according to specified conditions
 module ConditionedParser
   autoload :Query, 'conditioned_parser/query'
+  autoload :Filter, 'conditioned_parser/filter'
+  autoload :Matcher, 'conditioned_parser/matcher'
 
   # document representation
   module Model
@@ -19,19 +21,16 @@ module ConditionedParser
     autoload :Word, 'conditioned_parser/model/word'
   end
 
-  def self.with_document(raw_data, &block)
-    @document = Model::DocumentInputProcessor.build_document(raw_data)
-    @context = eval 'self', block.binding
-    instance_eval(&block) if block_given?
-  end
+  class << self
+    def with_document(raw_data, &block)
+      @document = Model::DocumentInputProcessor.build_document(raw_data)
+      instance_eval(&block) if block_given?
+    end
 
-  def self.define_query(&block)
-    query = Query.new(@document, @context)
-    query.instance_eval(&block) if block_given?
-    query
-  end
-
-  def self.method_missing(method, *args, &block)
-    @context.__send__(method, *args, &block)
+    def define_query(&block)
+      query = Query.new(@document)
+      query.instance_eval(&block) if block_given?
+      query
+    end
   end
 end

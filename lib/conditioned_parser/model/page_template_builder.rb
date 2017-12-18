@@ -21,14 +21,14 @@ module ConditionedParser
       end
 
       def self.build_template(regions)
-        regions.each_with_object({}) do |region, memo|
+        regions.each_with_object([]) do |region, memo|
           region_box = {
             x_start: region[:x_start],
             x_end: region[:x_end],
             y_start: region[:y_start],
             y_end: region[:y_end]
           }
-          memo[region[:identifier]] = PageRegion.new(region_box)
+          memo << PageRegion.new(region_box, region[:identifier])
         end
       end
     end

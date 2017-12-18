@@ -4,6 +4,7 @@ module ConditionedParser
     # size and contained elements
     class ContentElement
       include Box
+      include Filter
       attr_accessor :sub_elements
 
       def initialize(box, sub_elements = nil)
