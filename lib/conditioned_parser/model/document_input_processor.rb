@@ -16,7 +16,7 @@ module ConditionedParser
       end
 
       def self.define_page_box(width, height)
-        box = {
+        {
           x_start: 0.0,
           x_end: width,
           y_start: 0.0,

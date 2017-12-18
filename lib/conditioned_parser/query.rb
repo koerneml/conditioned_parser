@@ -57,8 +57,8 @@ module ConditionedParser
       !@search_scope.empty?
     end
 
-    def search_item(value)
-      @search_item = value
+    def search_item_name(item)
+      @search_item = item
     end
 
     def with_template(template_data)

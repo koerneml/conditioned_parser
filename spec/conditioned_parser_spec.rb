@@ -13,7 +13,7 @@ RSpec.describe ConditionedParser do
       ConditionedParser.with_document raw_data do
         query = define_query do
           page 1
-          search_item :type
+          search_item_name :type
           pattern(/Rechnung/)
         end
       end
@@ -26,7 +26,7 @@ RSpec.describe ConditionedParser do
       ConditionedParser.with_document raw_data do
         query = define_query do
           page 1
-          search_item :type
+          search_item_name :type
           pattern(/YOLO!!/)
         end
       end
@@ -57,7 +57,7 @@ RSpec.describe ConditionedParser do
           with_template [address_region, somewhere_else]
           region :address
           as_text_lines
-          search_item :postal
+          search_item_name :postal
           pattern(/^\d{5}/)
         end
       end
@@ -72,7 +72,7 @@ RSpec.describe ConditionedParser do
           page 1
           with_template [address_region, somewhere_else]
           region :somewhere
-          search_item :postal
+          search_item_name :postal
           pattern(/^\d{5}/)
         end
       end
@@ -95,7 +95,6 @@ RSpec.describe ConditionedParser do
     end
 
     context 'when chaining conditions' do
-
       it 'allows chaining conditions with and - true - true' do
         good_query = nil
         other_good_query = nil
@@ -105,12 +104,12 @@ RSpec.describe ConditionedParser do
             with_template [address_region, somewhere_else]
             region :address
             as_text_lines
-            search_item :postal
+            search_item_name :postal
             pattern(/^\d{5}/)
           end
           other_good_query = define_query do
             page 1
-            search_item :type
+            search_item_name :type
             pattern(/Rechnung/)
           end
         end
@@ -125,13 +124,13 @@ RSpec.describe ConditionedParser do
             page 1
             with_template [address_region, somewhere_else]
             region :address
-            search_item :postal
+            search_item_name :postal
             pattern(/^\d{5}/)
           end
           bad_query = define_query do
             pages 1..2
             as_text_lines
-            search_item :bs
+            search_item_name :bs
             pattern(/YOLO/)
           end
         end
