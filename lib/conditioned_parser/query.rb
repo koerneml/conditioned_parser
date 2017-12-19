@@ -17,8 +17,8 @@ module ConditionedParser
       @search_scope = Model::ModelBuilder.build_lines(@search_scope, options)
     end
 
-    def font_size(value)
-      # TODO: Implement
+    def font_size(range)
+      @search_scope = @search_scope.select { |element| range.include?(element.height) }
     end
 
     def page(num)

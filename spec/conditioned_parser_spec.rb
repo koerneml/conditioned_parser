@@ -94,6 +94,38 @@ RSpec.describe ConditionedParser do
       expect(text_lines.last.matches?(/^\d{5}/)).to be true
     end
 
+    it 'filters per font size - in range' do
+      query = nil
+      ConditionedParser.with_document raw_data do
+        query = define_query do
+          page 1
+          with_template [address_region, somewhere_else]
+          region :address
+          font_size 10.0..15.0
+          as_text_lines
+          search_item_name :postal
+          pattern(/^\d{5}/)
+        end
+      end
+      expect(query.result?).to be true
+    end
+
+    it 'filters per font size - out of range' do
+      query = nil
+      ConditionedParser.with_document raw_data do
+        query = define_query do
+          page 1
+          with_template [address_region, somewhere_else]
+          region :address
+          font_size 15.0..20.0
+          as_text_lines
+          search_item_name :postal
+          pattern(/^\d{5}/)
+        end
+      end
+      expect(query.result?).to be false
+    end
+
     context 'when chaining conditions' do
       it 'allows chaining conditions with and - true - true' do
         good_query = nil
