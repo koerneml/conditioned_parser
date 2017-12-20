@@ -5,6 +5,8 @@ module ConditionedParser
   autoload :Query, 'conditioned_parser/query'
   autoload :Filter, 'conditioned_parser/filter'
   autoload :Matcher, 'conditioned_parser/matcher'
+  autoload :Region, 'conditioned_parser/region'
+  autoload :Template, 'conditioned_parser/template'
 
   # document representation
   module Model
@@ -25,6 +27,12 @@ module ConditionedParser
     def with_document(raw_data, &block)
       @document = Model::DocumentInputProcessor.build_document(raw_data)
       instance_eval(&block) if block_given?
+    end
+
+    def define_template(&block)
+      template = Template.new
+      template.instance_eval(&block) if block_given?
+      template
     end
 
     def define_query(&block)

@@ -5,12 +5,16 @@ module ConditionedParser
     include Matcher
     attr_accessor :search_scope
 
+    # Using a dedicated search scope allows for modifications on the elements without manipulating the original document object
+    # Hence, deep copys of the document are not needed when applying multiple queries in sequence
+    # Nonetheless, modifications on the scope have to be done with care, the referenced objects are still contained in the document
+    # -> only invoke methods returning new_ary
     def initialize(document)
       @search_scope = document.pages
     end
 
     def as_text_block(options = {})
-      # TODO: Implement
+      @search_scope = Model::ModelBuilder.build_block(@search_scope, options)
     end
 
     def as_text_lines(options = {})
@@ -39,7 +43,7 @@ module ConditionedParser
     end
 
     def region(identifier)
-      @page_regions.select! { |region| region.identifier == identifier }
+      @page_regions = @page_regions.select { |region| region.identifier == identifier }
       @search_scope = @search_scope.select { |element| @page_regions.any? { |region| element.contained_in?(region) } }
     end
 
@@ -61,8 +65,8 @@ module ConditionedParser
       @search_item = item
     end
 
-    def with_template(template_data)
-      @page_regions = Model::PageTemplateBuilder.build_template(template_data)
+    def with_template(template)
+      @page_regions = template.regions
     end
   end
 end

@@ -6,15 +6,31 @@ RSpec.describe ConditionedParser do
   end
 
   context 'when parsing ACTUAL documents' do
-    let(:raw_data) { Nori.new(advanced_typecasting: false).parse(File.read(File.expand_path('files/real_life_test.xml', File.dirname(__FILE__)))) }
+    let(:raw_data) { Nori.new(advanced_typecasting: false).parse(File.read(File.expand_path('files/receiver/read_receiver8.xml', File.dirname(__FILE__)))) }
+
+    let(:address_template_def) do
+      proc do
+        define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
+      end
+    end 
 
     it 'finds a simple string in the document' do
       query = nil
       ConditionedParser.with_document raw_data do
         query = define_query do
           page 1
-          search_item_name :type
-          pattern(/Rechnung/)
+          as_text_lines
+          search_item_name :name
+          pattern(/Testos Teron/)
         end
       end
       puts query.result
@@ -34,46 +50,51 @@ RSpec.describe ConditionedParser do
       expect(query.result?).to be false
     end
 
-    address_region = {
-      identifier: :address,
-      x_start: 70.0,
-      x_end: 200.0,
-      y_start: 160.0,
-      y_end: 235.0
-    }
-    somewhere_else = {
-      identifier: :somewhere,
-      x_start: 0.0,
-      x_end: 20.0,
-      y_start: 0.0,
-      y_end: 50.0
-    }
-
     it 'looks up specific stuff in previously defined regions' do
-      query = nil
+      postal_query = nil
       ConditionedParser.with_document raw_data do
-        query = define_query do
+        template = define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
+        postal_query = define_query do
           page 1
-          with_template [address_region, somewhere_else]
+          with_template template
           region :address
           as_text_lines
-          search_item_name :postal
-          pattern(/^\d{5}/)
+          search_item_name :postal 
+          pattern(/\A\d{5}/)
         end
       end
-      puts query.result
-      expect(query.result?).to be true
+      puts postal_query.result
+      expect(postal_query.result?).to be true
     end
 
     it 'does not find the string in a region where it is not' do
       query = nil
       ConditionedParser.with_document raw_data do
+        template = define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
         query = define_query do
           page 1
-          with_template [address_region, somewhere_else]
-          region :somewhere
+          with_template template
+          region :somewhere_else
           search_item_name :postal
-          pattern(/^\d{5}/)
+          pattern(/\A\d{5}/)
         end
       end
       puts query.result
@@ -84,27 +105,47 @@ RSpec.describe ConditionedParser do
       query = nil
       text_lines = nil
       ConditionedParser.with_document raw_data do
+        template = define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
         query = define_query do
           page 1
-          with_template [address_region, somewhere_else]
+          with_template template
           region :address
           text_lines = as_text_lines
         end
       end
-      expect(text_lines.last.matches?(/^\d{5}/)).to be true
+      expect(text_lines.last.matches?(/\A\d{5}/)).to be true
     end
 
     it 'filters per font size - in range' do
       query = nil
       ConditionedParser.with_document raw_data do
+        template = define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
         query = define_query do
           page 1
-          with_template [address_region, somewhere_else]
+          with_template template
           region :address
           font_size 10.0..15.0
           as_text_lines
           search_item_name :postal
-          pattern(/^\d{5}/)
+          pattern(/\A\d{5}/)
         end
       end
       expect(query.result?).to be true
@@ -113,14 +154,24 @@ RSpec.describe ConditionedParser do
     it 'filters per font size - out of range' do
       query = nil
       ConditionedParser.with_document raw_data do
+        template = define_template do
+          region :address do
+            starts_at_point(55.0, 80.0)
+            ends_at_point(180.0, 140.0)
+          end
+          region :somewhere_else do
+            starts_at_point(0.0, 0.0)
+            ends_at_point(20.0, 50.0)
+          end
+        end
         query = define_query do
           page 1
-          with_template [address_region, somewhere_else]
+          with_template template
           region :address
           font_size 15.0..20.0
           as_text_lines
           search_item_name :postal
-          pattern(/^\d{5}/)
+          pattern(/\A\d{5}/)
         end
       end
       expect(query.result?).to be false
@@ -131,18 +182,29 @@ RSpec.describe ConditionedParser do
         good_query = nil
         other_good_query = nil
         ConditionedParser.with_document raw_data do
+          template = define_template do
+            region :address do
+              starts_at_point(55.0, 80.0)
+              ends_at_point(180.0, 140.0)
+            end
+            region :somewhere_else do
+              starts_at_point(0.0, 0.0)
+              ends_at_point(20.0, 50.0)
+            end
+          end
           good_query = define_query do
             page 1
-            with_template [address_region, somewhere_else]
+            with_template template 
             region :address
             as_text_lines
             search_item_name :postal
-            pattern(/^\d{5}/)
+            pattern(/\A\d{5}/)
           end
           other_good_query = define_query do
             page 1
-            search_item_name :type
-            pattern(/Rechnung/)
+            as_text_lines
+            search_item_name :name
+            pattern(/Testos Teron/)
           end
         end
         expect(good_query.result? && other_good_query.result?).to be true
@@ -152,12 +214,22 @@ RSpec.describe ConditionedParser do
         good_query = nil
         bad_query = nil
         ConditionedParser.with_document raw_data do
+          template = define_template do
+            region :address do
+              starts_at_point(55.0, 80.0)
+              ends_at_point(180.0, 140.0)
+            end
+            region :somewhere_else do
+              starts_at_point(0.0, 0.0)
+              ends_at_point(20.0, 50.0)
+            end
+          end
           good_query = define_query do
             page 1
-            with_template [address_region, somewhere_else]
+            with_template template
             region :address
             search_item_name :postal
-            pattern(/^\d{5}/)
+            pattern(/\A\d{5}/)
           end
           bad_query = define_query do
             pages 1..2
@@ -168,6 +240,31 @@ RSpec.describe ConditionedParser do
         end
         expect(good_query.result? && bad_query.result?).to be false
         expect(good_query.result? || bad_query.result?).to be true
+      end
+    end
+
+    context 'when defining templates' do
+      it 'defines templates by absolute coordinates' do
+        ConditionedParser.with_document raw_data do
+          template = define_template do
+            region :address do
+              starts_at_point(25, 30)
+              ends_at_point(50, 70)
+            end
+          end
+        end
+      end
+
+      it 'defines templates by starting point and box data' do
+        ConditionedParser.with_document raw_data do
+          template = define_template do
+            region :address do
+              starts_at_point(25, 30)
+              has_width 50
+              has_height 200
+            end
+          end
+        end
       end
     end
   end
