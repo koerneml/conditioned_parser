@@ -39,7 +39,6 @@ module ConditionedParser
       if size_based_definition?
         define_size_box
       elsif point_based_definition?
-        return
       else
         raise 'Incomplete or inconsistent region definition'
       end
@@ -64,15 +63,15 @@ module ConditionedParser
     end
 
     def define_dist_box(page)
-      x_start = @left_dist + page.x_start,
-      x_end = page.x_end - @right_dist,
-      y_start = @upper_dist + page.y_start,
-      y_end = page.y_end - @lower_dist
+      @x_start = @left_dist + page.x_start
+      @x_end = page.x_end - @right_dist
+      @y_start = @upper_dist + page.y_start
+      @y_end = page.y_end - @lower_dist
     end
 
     def define_size_box
-      x_end = x_start + @width,
-      y_end = y_start + @height
+      @x_end = x_start + @width
+      @y_end = y_start + @height
     end
   end
 end

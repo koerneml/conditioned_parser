@@ -21,7 +21,7 @@ RSpec.describe ConditionedParser do
           end
         end
       end
-    end 
+    end
 
     it 'finds a simple string in the document' do
       query = nil
@@ -68,7 +68,7 @@ RSpec.describe ConditionedParser do
           with_template template
           region :address
           as_text_lines
-          search_item_name :postal 
+          search_item_name :postal
           pattern(/\A\d{5}/)
         end
       end
@@ -194,7 +194,7 @@ RSpec.describe ConditionedParser do
           end
           good_query = define_query do
             page 1
-            with_template template 
+            with_template template
             region :address
             as_text_lines
             search_item_name :postal
@@ -246,7 +246,7 @@ RSpec.describe ConditionedParser do
     context 'when defining templates' do
       it 'defines templates by absolute coordinates' do
         ConditionedParser.with_document raw_data do
-          template = define_template do
+          define_template do
             region :address do
               starts_at_point(25, 30)
               ends_at_point(50, 70)
@@ -257,7 +257,7 @@ RSpec.describe ConditionedParser do
 
       it 'defines templates by starting point and box data' do
         ConditionedParser.with_document raw_data do
-          template = define_template do
+          define_template do
             region :address do
               starts_at_point(25, 30)
               has_width 50
