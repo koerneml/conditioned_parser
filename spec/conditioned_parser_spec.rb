@@ -8,21 +8,6 @@ RSpec.describe ConditionedParser do
   context 'when parsing ACTUAL documents' do
     let(:raw_data) { Nori.new(advanced_typecasting: false).parse(File.read(File.expand_path('files/receiver/read_receiver8.xml', File.dirname(__FILE__)))) }
 
-    let(:address_template_def) do
-      proc do
-        define_template do
-          region :address do
-            starts_at_point(55.0, 80.0)
-            ends_at_point(180.0, 140.0)
-          end
-          region :somewhere_else do
-            starts_at_point(0.0, 0.0)
-            ends_at_point(20.0, 50.0)
-          end
-        end
-      end
-    end
-
     it 'finds a simple string in the document' do
       query = nil
       ConditionedParser.with_document raw_data do
@@ -51,7 +36,7 @@ RSpec.describe ConditionedParser do
     end
 
     it 'looks up specific stuff in previously defined regions' do
-      postal_query = nil
+      query = nil
       ConditionedParser.with_document raw_data do
         template = define_template do
           region :address do
@@ -63,7 +48,7 @@ RSpec.describe ConditionedParser do
             ends_at_point(20.0, 50.0)
           end
         end
-        postal_query = define_query do
+        query = define_query do
           page 1
           with_template template
           region :address
@@ -72,8 +57,7 @@ RSpec.describe ConditionedParser do
           pattern(/\A\d{5}/)
         end
       end
-      puts postal_query.result
-      expect(postal_query.result?).to be true
+      expect(query.result?).to be true
     end
 
     it 'does not find the string in a region where it is not' do

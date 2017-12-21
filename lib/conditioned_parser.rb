@@ -17,8 +17,6 @@ module ConditionedParser
     autoload :Line, 'conditioned_parser/model/line'
     autoload :ModelBuilder, 'conditioned_parser/model/model_builder'
     autoload :Page, 'conditioned_parser/model/page'
-    autoload :PageRegion, 'conditioned_parser/model/page_region'
-    autoload :PageTemplateBuilder, 'conditioned_parser/model/page_template_builder'
     autoload :TextBox, 'conditioned_parser/model/text_box'
     autoload :Word, 'conditioned_parser/model/word'
   end
@@ -30,15 +28,11 @@ module ConditionedParser
     end
 
     def define_template(&block)
-      template = Template.new
-      template.instance_eval(&block) if block_given?
-      template
+      Template.new.tap { |t| t.instance_eval(&block) if block_given? }
     end
 
     def define_query(&block)
-      query = Query.new(@document)
-      query.instance_eval(&block) if block_given?
-      query
+      Query.new(@document).tap { |q| q.instance_eval(&block) if block_given? }
     end
   end
 end
