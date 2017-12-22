@@ -1,6 +1,6 @@
 module ConditionedParser
   module Model
-    # Builds the document object model based on raw data specification
+    # constructs and aggregates model data
     class ModelBuilder
       def self.build_line(words)
         Line.new(surrounding_box_for(words), words)

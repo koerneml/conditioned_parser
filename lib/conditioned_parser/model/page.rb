@@ -4,8 +4,8 @@ module ConditionedParser
     class Page < ContentElement
       attr_accessor :page_no
 
-      def initialize(box, page_no)
-        super(box)
+      def initialize(box, page_no, content = [])
+        super(box, content)
         @page_no = page_no
       end
     end

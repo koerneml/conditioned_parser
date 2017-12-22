@@ -6,9 +6,9 @@ module ConditionedParser
       include Box
       attr_accessor :sub_elements
 
-      def initialize(box, sub_elements = nil)
+      def initialize(box, sub_elements = [])
         define_box(box)
-        @sub_elements = [] if (@sub_elements = sub_elements).nil?
+        @sub_elements = sub_elements
       end
 
       def define_box(box)
@@ -31,15 +31,15 @@ module ConditionedParser
       end
 
       def matches?(expression)
-        !match(expression).nil?
+        !match(expression).empty?
       end
 
       def match(expression)
         matching = contained_text.match(expression)
         if matching.nil?
-          nil
+          []
         else
-          matching[0]
+          matching.to_a
         end
       end
     end
