@@ -12,6 +12,26 @@ module ConditionedParser
         other.x_start >= x_start && other.x_end <= x_end && other.y_start >= y_start && other.y_end <= y_end
       end
 
+      def left_of?(other)
+        x_end <= other.x_start
+      end
+
+      def right_of?(other)
+        x_start >= other.x_end
+      end
+
+      def overlap?(other)
+        x_overlap?(other) && y_overlap?(other)
+      end
+
+      def x_overlap?(other)
+        (x_start..x_end).cover?(other.x_start) || (x_start..x_end).cover?(other.x_end)
+      end
+
+      def y_overlap?(other)
+        (y_start..y_end).cover?(other.y_start) || (y_start..y_end).cover?(other.y_end)
+      end
+
       def on_same_line?(other, options = {})
         defaults = { y_tolerance: 0.5, height_tolerance: 2.0 }
         defaults.merge!(options)
@@ -25,22 +45,6 @@ module ConditionedParser
 
       def height
         y_end - y_start
-      end
-
-      def x_distance(other)
-        if other.x_start >= x_end
-          other.x_start - x_end
-        else
-          x_start - other.x_end
-        end
-      end
-
-      def y_distance(other)
-        if other.y_start >= y_end
-          other.y_start - y_end
-        else
-          y_start - other.y_end
-        end
       end
     end
   end

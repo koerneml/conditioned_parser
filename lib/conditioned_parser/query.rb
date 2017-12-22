@@ -1,8 +1,6 @@
 module ConditionedParser
   # Applies a query from dsl query specification
   class Query
-    include Filter
-    include Matcher
     attr_accessor :search_scope
 
     # Using a dedicated search scope allows for modifications on the elements without manipulating the original document object
@@ -26,7 +24,7 @@ module ConditionedParser
     end
 
     def page(num)
-      @search_scope = filter_search_scope_by_page_no(num)[0].sub_elements
+      @search_scope = @search_scope.select { |page| page.page_no == num }[0].sub_elements
     end
 
     def pages(range)
@@ -39,7 +37,7 @@ module ConditionedParser
 
     def pattern(expression)
       @match_pattern = expression
-      @search_scope = match_search_scope_by(expression)
+      @search_scope = @search_scope.select { |element| element.matches?(expression) } 
     end
 
     def region(identifier)
