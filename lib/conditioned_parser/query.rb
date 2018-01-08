@@ -37,7 +37,7 @@ module ConditionedParser
 
     def pattern(expression)
       @match_pattern = expression
-      @search_scope = @search_scope.select { |element| element.matches?(expression) } 
+      @search_scope = @search_scope.select { |element| element.matches?(expression) }
     end
 
     def region(identifier)

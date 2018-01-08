@@ -1,5 +1,4 @@
 RSpec.describe ConditionedParser::Model::Line do
-
   box_data = {
     x_start: 0.0,
     x_end: 24.0,

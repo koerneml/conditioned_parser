@@ -1,5 +1,4 @@
 RSpec.describe ConditionedParser::Model::ContentElement do
-
   dummy_box = {
     x_start: 0.0,
     x_end: 20.0,

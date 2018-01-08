@@ -9,7 +9,7 @@ module ConditionedParser
 
     def define_region(identifier, &block)
       raise 'Block required for region definition!' unless block_given?
-      region = Region.new(identifier).tap { |r| r.instance_eval(&block) }
+      region = Region.new(identifier).tap { |r| r.instance_exec(&block) }
       region.define_box
       @regions << region
     end

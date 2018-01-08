@@ -39,6 +39,7 @@ module ConditionedParser
       if size_based_definition?
         define_size_box
       elsif point_based_definition?
+        # do nothing as everything is defined
       else
         raise 'Incomplete or inconsistent region definition'
       end
