@@ -13,6 +13,6 @@ RSpec.describe ConditionedParser::Model::Line do
   let(:line) { ConditionedParser::Model::Line.new(box_data, line_words) }
 
   it 'correctly gives its contained text' do
-    expect(line.contained_text).to eq 'word0 word1 word2 word3'
+    expect(line.contained_text).to eq "word0 word1 word2 word3\n"
   end
 end

@@ -12,11 +12,17 @@ module ConditionedParser
     end
 
     def as_text_block(options = {})
-      @search_scope = Model::ModelBuilder.build_block(@search_scope, options)
+      @search_scope = if @line_grouped
+                        Model::ModelBuilder.build_blocks_from_lines(@search_scope, options)
+                      else
+                        Model::ModelBuilder.build_blocks_from_words(@search_scope, options)
+                      end
     end
 
     def as_text_lines(options = {})
       @search_scope = Model::ModelBuilder.build_lines(@search_scope, options)
+      # TODO: Exclusion test?!
+      @line_grouped = true
     end
 
     def font_size(range)
@@ -49,7 +55,7 @@ module ConditionedParser
       result_hsh = {}
       matches = []
       @search_scope.each do |element|
-        matches << element.match(@match_pattern)
+        (matches << element.match(@match_pattern)).flatten!
       end
       result_hsh[@search_item] = matches
       result_hsh

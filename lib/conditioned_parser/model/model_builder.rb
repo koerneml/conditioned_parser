@@ -18,9 +18,13 @@ module ConditionedParser
         lines
       end
 
-      def self.build_block(words)
+      def self.build_blocks_from_lines(lines, _options = {})
+        [TextBox.new(surrounding_box_for(lines), lines)]
+      end
+
+      def self.build_blocks_from_words(words, options = {})
         lines = build_lines(words)
-        TextBox.new(surrounding_box_for(lines), lines)
+        build_blocks_from_lines(lines, options)
       end
 
       def self.surrounding_box_for(content_elements)
