@@ -1,3 +1,5 @@
+require_relative 'content_element'
+
 module ConditionedParser
   module Model
     # Represents a page in the document to be queried

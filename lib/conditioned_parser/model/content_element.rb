@@ -1,3 +1,5 @@
+require_relative 'box'
+
 module ConditionedParser
   module Model
     # Represents a basic content element in the document. Each element consists of a bounding box defining its

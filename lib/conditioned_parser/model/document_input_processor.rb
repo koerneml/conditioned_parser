@@ -1,3 +1,7 @@
+require_relative 'document'
+require_relative 'page'
+require_relative 'word'
+
 module ConditionedParser
   module Model
     # Processes raw input data to generate an initial document representation
